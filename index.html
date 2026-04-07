@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surprise for Jana</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Monoton&family=Pacifico&family=Playfair+Display:ital,wght@1,700&family=Roboto+Mono:wght@500&family=Fredoka+One&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark-1: #000000;
+            --bg-dark-2: #0f2027;
+            --bg-dark-3: #203a43;
+            --bg-dark-4: #2c5364;
+            
+            --bg-pink-final: #fad0c4;
+            --bg-pink-final-2: #ffd1ff;
+            
+            --moon-color: #f6f1d5;
+            --moon-glow: rgba(246, 241, 213, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        /* --- Phase 1: Dark Space --- */
+        body.phase-one {
+            background: linear-gradient(to bottom, var(--bg-dark-1), var(--bg-dark-2), var(--bg-dark-3), var(--bg-dark-4));
+        }
+
+        /* --- Phase 2: The "Global Event" Flash Animation --- */
+        @keyframes globalEventFlash {
+            0% { background: #ffffff; }
+            10% { background: #ffeb3b; }
+            20% { background: #e91e63; }
+            30% { background: #9c27b0; }
+            40% { background: #00bcd4; }
+            50% { background: #ffffff; }
+            100% { background: linear-gradient(135deg, #e6e6fa 0%, var(--bg-pink-final) 50%, var(--bg-pink-final-2) 100%); }
+        }
+
+        body.phase-two {
+            animation: globalEventFlash 1.5s ease-out forwards;
+        }
+
+        /* Scattered Names Container */
+        #name-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: auto;
+            transition: opacity 0.5s ease;
+        }
+
+        .scattered-name {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.15);
+            user-select: none;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 5;
+        }
+
+        .scattered-name:hover {
+            color: #00e5ff;
+            text-shadow: 0 0 15px #00e5ff, 0 0 30px #00e5ff;
+            transform: scale(1.5) rotate(0deg) !important;
+            opacity: 1;
+            z-index: 15;
+        }
+
+        @keyframes floatName {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        /* Main Content */
+        main {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .moon-wrapper {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .moon-wrapper:hover {
+            transform: scale(1.15) rotate(-10deg);
+        }
+
+        .moon {
+            width: 140px;
+            height: 140px;
+            background: var(--moon-color);
+            border-radius: 50%;
+            box-shadow: 0 0 80px 30px var(--moon-glow);
+            position: relative;
+            transition: all 0.5s ease;
+        }
+
+        .moon::after {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 30%;
+            width: 20px;
+            height: 20px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 50%;
+            box-shadow: 40px 50px 0 -5px rgba(0,0,0,0.05), 20px 60px 0 -8px rgba(0,0,0,0.05);
+        }
+
+        .hint-text {
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            font-family: 'Roboto Mono', monospace;
+            transition: opacity 0.3s ease;
+            animation: pulse 2s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* --- Flower Rain Animation --- */
+        .flower {
+            position: absolute;
+            top: -10%;
+            font-size: 2rem;
+            z-index: 20;
+            pointer-events: none;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(360deg); }
+        }
+
+        /* --- Final Message Card --- */
+        .final-card {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            /* No transition on transform here because we handle it manually via JS for the complex effect */
+            z-index: 30;
+            width: 90%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .final-card.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .final-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 3rem;
+            color: #d63384;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0px white;
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        .final-subtitle {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.2rem;
+            color: #6f42c1;
+            margin-bottom: 40px; /* More space for the flying words */
+            text-align: center;
+        }
+
+        /* --- Dynamic Wish Text Container --- */
+        #wish-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            min-height: 100px; /* Reserve space */
+            perspective: 1000px;
+        }
+
+        .wish-word {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.8rem; /* Size per word */
+            color: #d63384; /* Pink text */
+            margin: 0 5px;
+            display: inline-block;
+            white-space: nowrap;
+            /* The Glow Animation for the final state */
+            animation: textGlow 1.5s infinite alternate;
+        }
+
+        @keyframes textGlow {
+            0% { text-shadow: 0 0 5px rgba(214, 51, 132, 0.2); transform: scale(1); }
+            100% { text-shadow: 0 0 20px rgba(214, 51, 132, 0.8), 0 0 10px white; transform: scale(1.05); }
+        }
+
+        /* Reset Button */
+        .reset-btn {
+            margin-top: 40px;
+            background: #fff;
+            color: #d63384;
+            border: 2px solid #d63384;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-family: 'Segoe UI', sans-serif;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .reset-btn:hover {
+            background: #d63384;
+            color: white;
+            box-shadow: 0 5px 15px rgba(214, 51, 132, 0.4);
+        }
+
+        .reset-btn.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 600px) {
+            .final-title { font-size: 2rem; }
+            .final-subtitle { font-size: 1.5rem; }
+            .wish-word { font-size: 1.2rem; }
+            .moon { width: 100px; height: 100px; }
+        }
+    </style>
+</head>
+<body class="phase-one">
+
+    <div id="name-container"></div>
+
+    <main>
+        <div class="moon-wrapper" id="moon-btn">
+            <div class="moon"></div>
+        </div>
+        <p class="hint-text" id="hint">Click the Moon</p>
+    </main>
+
+    <div class="final-card" id="final-message">
+        <h1 class="final-title">Cutest janhuunnnnnnn</h1>
+        <h2 class="final-subtitle">The Cutie</h2>
+        
+        <!-- Container for the animated text -->
+        <div id="wish-container"></div>
+        
+        <button class="reset-btn" id="reset-btn">Play Again ↺</button>
+    </div>
+
+    <script>
+        const nameToRepeat = "Jana";
+        const fonts = ["'Dancing Script'", "'Monoton'", "'Pacifico'", "'Playfair Display'", "'Roboto Mono'"];
+        const numberOfNames = 40;
+        const flowerEmojis = ['🌸', '🌹', '🌺', '🌷', '🌼', '✨', '💖'];
+        const wishWords = ["You'll", "Ace", "All", "Subjects,", "Inshallah!", "✨"];
+
+        const nameContainer = document.getElementById('name-container');
+        const moonBtn = document.getElementById('moon-btn');
+        const hint = document.getElementById('hint');
+        const body = document.body;
+        const finalMessage = document.getElementById('final-message');
+        const wishContainer = document.getElementById('wish-container');
+        const resetBtn = document.getElementById('reset-btn');
+
+        let flowerInterval;
+
+        function createScatteredNames() {
+            nameContainer.innerHTML = ''; 
+            for (let i = 0; i < numberOfNames; i++) {
+                const span = document.createElement('span');
+                span.innerText = nameToRepeat;
+                span.classList.add('scattered-name');
+                
+                const top = Math.random() * 100;
+                const left = Math.random() * 100;
+                const randomFont = fonts[Math.floor(Math.random() * fonts.length)];
+                const size = 1 + Math.random() * 2.5; 
+
+                span.style.top = `${top}%`;
+                span.style.left = `${left}%`;
+                span.style.fontFamily = randomFont;
+                span.style.fontSize = `${size}rem`;
+                span.style.animationDelay = `${Math.random() * 5}s`;
+                span.style.transform = `rotate(${Math.random() * 30 - 15}deg)`;
+
+                span.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    startSurprise();
+                });
+
+                nameContainer.appendChild(span);
+            }
+        }
+
+        function startFlowerRain() {
+            flowerInterval = setInterval(() => {
+                const flower = document.createElement('div');
+                flower.classList.add('flower');
+                flower.innerText = flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)];
+                flower.style.left = Math.random() * 100 + 'vw';
+                flower.style.fontSize = (Math.random() * 2 + 1) + 'rem'; 
+                flower.style.animationDuration = (Math.random() * 2 + 2) + 's'; 
+                document.body.appendChild(flower);
+                setTimeout(() => { flower.remove(); }, 4000);
+            }, 100);
+        }
+
+        function stopFlowerRain() {
+            clearInterval(flowerInterval);
+            document.querySelectorAll('.flower').forEach(f => f.remove());
+        }
+
+        // --- THE NEW TEXT ANIMATION FUNCTION ---
+        function animateWishText() {
+            wishContainer.innerHTML = ''; // Clear previous
+
+            // Calculate center of screen for scattering logic
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+
+            wishWords.forEach((word, index) => {
+                const span = document.createElement('span');
+                span.innerText = word;
+                span.classList.add('wish-word');
+                
+                // Random scatter offset (large enough to reach edges)
+                const randX = (Math.random() - 0.5) * window.innerWidth * 0.9;
+                const randY = (Math.random() - 0.5) * window.innerHeight * 0.8;
+                const randRot = (Math.random() - 0.5) * 720; // Random spin
+
+                // Initial State: Scattered and invisible
+                span.style.opacity = '0';
+                span.style.transition = 'transform 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.5s ease';
+                span.style.transform = `translate(${randX}px, ${randY}px) rotate(${randRot}deg) scale(0.5)`;
+                
+                wishContainer.appendChild(span);
+
+                // Phase 1: Pop In (Staggered)
+                setTimeout(() => {
+                    span.style.opacity = '1';
+                    // Reset transform slightly to bring it closer to view but keep scattered
+                    span.style.transform = `translate(${randX}px, ${randY}px) rotate(0deg) scale(1)`;
+                }, index * 150); // Fast stagger (150ms per word)
+
+                // Phase 2: Gather (All move to center at once)
+                setTimeout(() => {
+                    span.style.transition = 'transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    // Setting transform to 0,0 brings it back to the Flexbox flow position
+                    span.style.transform = `translate(0, 0) scale(1)`;
+                }, 2000 + (index * 50)); // Start gathering after 2 seconds
+            });
+        }
+
+        function startSurprise() {
+            if (body.classList.contains('phase-two')) return;
+
+            body.classList.remove('phase-one');
+            body.classList.add('phase-two');
+
+            nameContainer.style.opacity = '0';
+            document.querySelectorAll('.scattered-name').forEach(el => el.style.pointerEvents = 'none');
+            moonBtn.style.opacity = '0';
+            moonBtn.style.pointerEvents = 'none';
+            hint.style.opacity = '0';
+
+            startFlowerRain();
+
+            setTimeout(() => {
+                finalMessage.classList.add('show');
+                resetBtn.classList.add('visible');
+                // Trigger the word animation when card shows
+                animateWishText();
+            }, 1500);
+        }
+
+        moonBtn.addEventListener('click', startSurprise);
+
+        resetBtn.addEventListener('click', () => {
+            stopFlowerRain();
+            finalMessage.classList.remove('show');
+            resetBtn.classList.remove('visible');
+            wishContainer.innerHTML = ''; // Clear text for next time
+
+            body.classList.remove('phase-two');
+            void body.offsetWidth; 
+            body.classList.add('phase-one');
+
+            createScatteredNames();
+            nameContainer.style.opacity = '1';
+            moonBtn.style.opacity = '1';
+            moonBtn.style.pointerEvents = 'auto';
+            hint.style.opacity = '1';
+        });
+
+        createScatteredNames();
+    </script>
+</body>
+</html>
